@@ -71,8 +71,13 @@ graph TD
 
 ## Execution
 
+**Important**: The `DOCKER_IMAGE_URI` must be explicitly loaded in your environment before compiling the pipelines, otherwise KFP will fallback to a default Python image without your dependencies.
+
 Compile and run the training pipeline:
 ```bash
+# Export the URI (Linux/Mac) or use $env:DOCKER_IMAGE_URI="<uri>" in PowerShell
+export DOCKER_IMAGE_URI="us-central1-docker.pkg.dev/your-gcp-project-id/mlops-repo/anchoveta-pipeline:latest"
+
 python src/pipelines/train_pipeline.py
 python scripts/submit_train.py
 ```
