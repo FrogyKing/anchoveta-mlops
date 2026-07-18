@@ -4,6 +4,7 @@ from kfp import compiler
 from kfp.dsl import Input, Output, Dataset, Model
 
 IMAGE_URI = os.getenv("DOCKER_IMAGE_URI") # Must be set during local compilation
+print(f"DEBUG: Compiling with IMAGE_URI={IMAGE_URI}")
 
 @dsl.component(base_image=IMAGE_URI)
 def extract_data_from_bq(
