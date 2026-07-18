@@ -31,6 +31,10 @@ def extract_infer_data(
         )
     )
 
+    # Convert dbdate and dbtime to standard strings before saving to parquet
+    for col in df.select_dtypes(include=['dbdate', 'object']).columns:
+        df[col] = df[col].astype(str)
+        
     df.to_parquet(dataset_out.path, index=False)
 
 @dsl.component(base_image=IMAGE_URI)

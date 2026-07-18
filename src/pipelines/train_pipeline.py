@@ -29,6 +29,11 @@ def extract_data_from_bq(
             create_bqstorage_client=False,
         )
     )
+    # Convert dbdate and dbtime to standard strings before saving to parquet
+    # BigQuery Storage API returns dbdate which Pandas/PyArrow cannot serialize natively.
+    for col in df.select_dtypes(include=['dbdate', 'object']).columns:
+        df[col] = df[col].astype(str)
+        
     df.to_parquet(dataset_out.path, index=False)
 
 @dsl.component(base_image=IMAGE_URI)
