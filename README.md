@@ -61,6 +61,12 @@ graph TD
     gcloud builds submit --config cloudbuild.yaml \
       --substitutions=_REGION=us-central1,_REPO_NAME=mlops-repo,_IMAGE_NAME=anchoveta-pipeline .
     ```
+   Or to build and push entirely locally (without Cloud Build):
+    ```bash
+    gcloud auth configure-docker us-central1-docker.pkg.dev
+    docker build -t $DOCKER_IMAGE_URI .
+    docker push $DOCKER_IMAGE_URI
+    ```
 
 3. **Python Environment**: Install dependencies to compile pipelines locally.
     ```bash
