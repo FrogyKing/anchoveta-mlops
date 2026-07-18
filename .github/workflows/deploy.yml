@@ -1,0 +1,55 @@
+name: Deploy BigQuery
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/anchoveta/locations/global/workloadIdentityPools/github/providers/github
+          service_account: github-cicd@anchoveta.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: anchoveta
+
+      - name: Deploy BigQuery SQL Objects
+        shell: bash
+        run: |
+          shopt -s nullglob
+
+          for layer in raw silver gold
+          do
+            echo "=============================="
+            echo "Deploying layer: $layer"
+            echo "=============================="
+
+            files=(bigquery/$layer/*.sql)
+
+            if [ ${#files[@]} -eq 0 ]; then
+              echo "No SQL files found in bigquery/$layer"
+              continue
+            fi
+
+            for file in "${files[@]}"
+            do
+              echo "Deploying $file"
+
+              bq query \
+                --use_legacy_sql=false \
+                < "$file"
+
+            done
+          done
