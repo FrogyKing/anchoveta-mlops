@@ -15,14 +15,14 @@ aiplatform.init(project=PROJECT_ID, location=REGION)
 
 job = aiplatform.PipelineJob(
     display_name="anchoveta-train",
-    template_path="src/pipelines/train_pipeline.json",
+    template_path="train_pipeline.json",
     pipeline_root=PIPELINE_ROOT,
     parameter_values={
         "project_id": PROJECT_ID,
         "region": REGION,
         "bq_table": BQ_TRAIN_TABLE,
         "model_display_name": MODEL_DISPLAY_NAME,
-        "experiment_name": EXPERIMENT_NAME,
+        "experiment_name": EXPERIMENT_NAME
     },
     enable_caching=False
 )
