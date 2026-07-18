@@ -3,7 +3,8 @@ from kfp import dsl
 from kfp import compiler
 from kfp.dsl import Input, Output, Dataset, Model
 
-IMAGE_URI = os.getenv("DOCKER_IMAGE_URI")
+# Hardcode temporarily to bypass local env issues for KFP compilation
+IMAGE_URI = "us-central1-docker.pkg.dev/anchoveta/mlops-repo/anchoveta-pipeline:latest"
 print(f"DEBUG: Compiling with IMAGE_URI={IMAGE_URI}")
 
 @dsl.component(base_image=IMAGE_URI)
