@@ -1,0 +1,22 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:$COMMIT_SHA', '.']
+
+  # Push the container image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:$COMMIT_SHA']
+
+  # Tag latest
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['tag', '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:$COMMIT_SHA', '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:latest']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:latest']
+
+substitutions:
+  _REGION: us-central1
+  _REPO_NAME: mlops-repo
+  _IMAGE_NAME: anchoveta-pipeline
+
+options:
+  logging: CLOUD_LOGGING_ONLY
