@@ -16,7 +16,7 @@ aiplatform.init(project=PROJECT_ID, location=REGION)
 
 job = aiplatform.PipelineJob(
     display_name="anchoveta-infer",
-    template_path="src/pipelines/infer_pipeline.json",
+    template_path="infer_pipeline.json",
     pipeline_root=PIPELINE_ROOT,
     parameter_values={
         "project_id": PROJECT_ID,

@@ -15,7 +15,7 @@ aiplatform.init(project=PROJECT_ID, location=REGION)
 
 job = aiplatform.PipelineJob(
     display_name="anchoveta-train",
-    template_path="src/pipelines/train_pipeline.json",
+    template_path="train_pipeline.json",
     pipeline_root=PIPELINE_ROOT,
     parameter_values={
         "project_id": PROJECT_ID,
