@@ -8,27 +8,34 @@ We use a single, unified Docker image for both the training and inference pipeli
 
 ```mermaid
 graph TD
-    subgraph Google Cloud
-        BQT(BigQuery Gold Features) -->|Extract| T1(Extract Data)
-        T1 --> T2(Train & Register)
-        T2 --> VE[(Vertex Experiments)]
-        T2 -->|Best Model + Stats| MR[(Model Registry)]
+    subgraph Google Cloud Project
+        BQT(BigQuery Gold Features)
+        VE[(Vertex Experiments)]
+        MR[(Model Registry)]
+        BQI(BigQuery Input Data)
+        BQP(BigQuery Predictions)
+        BQD(BigQuery Drift Metrics)
         
-        MR -->|Fetch Latest Model| I1(Predict & Drift Calc)
-        BQI(BigQuery Input Data) -->|Extract| I0(Extract Data)
+        subgraph Training Pipeline
+            T1(Extract Data)
+            T2(Train & Register)
+        end
+        
+        subgraph Inference Pipeline
+            I0(Extract Data)
+            I1(Predict & Drift Calc)
+        end
+        
+        BQT -->|Extract| T1
+        T1 --> T2
+        T2 -->|Log Metrics| VE
+        T2 -->|Best Model + Stats| MR
+        
+        MR -->|Fetch Latest Model| I1
+        BQI -->|Extract| I0
         I0 --> I1
-        I1 -->|Predictions| BQP(BigQuery Predictions)
-        I1 -->|KS Stats| BQD(BigQuery Drift Metrics)
-    end
-    
-    subgraph Training Pipeline
-        T1
-        T2
-    end
-    
-    subgraph Inference Pipeline
-        I0
-        I1
+        I1 -->|Predictions| BQP
+        I1 -->|KS Stats| BQD
     end
 ```
 
@@ -48,10 +55,11 @@ graph TD
     DOCKER_IMAGE_URI=us-central1-docker.pkg.dev/your-gcp-project-id/mlops-repo/anchoveta-pipeline:latest
     ```
 
-2. **Docker Image**: Build and push the unified image.
+2. **Docker Image**: Push to `main` branch to trigger the GitHub Action (`vertex-pipelines.yml`), which authenticates and builds the image via Cloud Build.
+   Alternatively, to build manually via Cloud Build:
     ```bash
-    docker build -t $DOCKER_IMAGE_URI .
-    docker push $DOCKER_IMAGE_URI
+    gcloud builds submit --config cloudbuild.yaml \
+      --substitutions=_REGION=us-central1,_REPO_NAME=mlops-repo,_IMAGE_NAME=anchoveta-pipeline .
     ```
 
 3. **Python Environment**: Install dependencies to compile pipelines locally.
