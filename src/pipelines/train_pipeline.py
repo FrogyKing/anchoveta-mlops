@@ -1,6 +1,7 @@
 import os
 from kfp import dsl
 from kfp import compiler
+from kfp.dsl import Input, Output, Dataset, Model
 
 IMAGE_URI = os.getenv("DOCKER_IMAGE_URI", "python:3.10-slim") # To be replaced at compile time or run time
 
@@ -8,7 +9,7 @@ IMAGE_URI = os.getenv("DOCKER_IMAGE_URI", "python:3.10-slim") # To be replaced a
 def extract_data_from_bq(
     project_id: str,
     bq_table: str,
-    dataset_out: dsl.Output[dsl.Dataset]
+    dataset_out: Output[Dataset]
 ):
     from google.cloud import bigquery
     import pandas as pd
@@ -22,10 +23,10 @@ def extract_data_from_bq(
 def train_and_register_model(
     project_id: str,
     region: str,
-    dataset_in: dsl.Input[dsl.Dataset],
+    dataset_in: Input[Dataset],
     model_display_name: str,
     experiment_name: str,
-    model_artifact: dsl.Output[dsl.Model]
+    model_artifact: Output[Model]
 ):
     import pandas as pd
     import numpy as np

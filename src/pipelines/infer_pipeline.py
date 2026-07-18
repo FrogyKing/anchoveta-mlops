@@ -1,6 +1,7 @@
 import os
 from kfp import dsl
 from kfp import compiler
+from kfp.dsl import Input, Output, Dataset, Model
 
 IMAGE_URI = os.getenv("DOCKER_IMAGE_URI", "python:3.10-slim")
 
@@ -8,7 +9,7 @@ IMAGE_URI = os.getenv("DOCKER_IMAGE_URI", "python:3.10-slim")
 def extract_infer_data(
     project_id: str,
     bq_table: str,
-    dataset_out: dsl.Output[dsl.Dataset]
+    dataset_out: Output[Dataset]
 ):
     from google.cloud import bigquery
     import pandas as pd
@@ -22,7 +23,7 @@ def extract_infer_data(
 def predict_and_drift(
     project_id: str,
     region: str,
-    dataset_in: dsl.Input[dsl.Dataset],
+    dataset_in: Input[Dataset],
     model_display_name: str,
     bq_pred_table: str,
     bq_drift_table: str
