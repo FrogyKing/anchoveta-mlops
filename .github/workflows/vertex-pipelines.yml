@@ -28,4 +28,7 @@ jobs:
 
       - name: Submit Cloud Build
         run: |
-          gcloud builds submit --config cloudbuild.yaml .
+          gcloud builds submit \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --config=cloudbuild.yaml \
+            .
