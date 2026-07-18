@@ -3,12 +3,9 @@ from kfp import dsl
 from kfp import compiler
 from kfp.dsl import Input, Output, Dataset, Model
 
-IMAGE_URI = os.getenv("DOCKER_IMAGE_URI", "python:3.10-slim")
+IMAGE_URI = os.getenv("DOCKER_IMAGE_URI")
 
-@dsl.component(
-    base_image=IMAGE_URI,
-    packages_to_install=["google-cloud-bigquery==3.42.2", "pandas<3.0.0", "db-dtypes", "pyarrow"]
-)
+@dsl.component(base_image=IMAGE_URI)
 def extract_infer_data(
     project_id: str,
     bq_table: str,
@@ -34,17 +31,7 @@ def extract_infer_data(
 
     df.to_parquet(dataset_out.path, index=False)
 
-@dsl.component(
-    base_image=IMAGE_URI,
-    packages_to_install=[
-        "google-cloud-aiplatform==1.161.0",
-        "google-cloud-bigquery==3.42.2",
-        "pandas<3.0.0",
-        "scipy==1.18.0",
-        "scikit-learn==1.9.0",
-        "pyarrow"
-    ]
-)
+@dsl.component(base_image=IMAGE_URI)
 def predict_and_drift(
     project_id: str,
     region: str,

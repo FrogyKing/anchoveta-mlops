@@ -3,12 +3,9 @@ from kfp import dsl
 from kfp import compiler
 from kfp.dsl import Input, Output, Dataset, Model
 
-IMAGE_URI = os.getenv("DOCKER_IMAGE_URI", "python:3.10-slim") # To be replaced at compile time or run time
+IMAGE_URI = os.getenv("DOCKER_IMAGE_URI") # Must be set during local compilation
 
-@dsl.component(
-    base_image=IMAGE_URI,
-    packages_to_install=["google-cloud-bigquery==3.42.2", "pandas<3.0.0", "db-dtypes", "pyarrow"]
-)
+@dsl.component(base_image=IMAGE_URI)
 def extract_data_from_bq(
     project_id: str,
     bq_table: str,
@@ -34,18 +31,7 @@ def extract_data_from_bq(
     
     df.to_parquet(dataset_out.path, index=False)
 
-@dsl.component(
-    base_image=IMAGE_URI,
-    packages_to_install=[
-        "google-cloud-aiplatform==1.161.0",
-        "pandas<3.0.0",
-        "scikit-learn==1.9.0",
-        "xgboost==3.3.0",
-        "lightgbm==4.6.0",
-        "catboost==1.2.10",
-        "pyarrow"
-    ]
-)
+@dsl.component(base_image=IMAGE_URI)
 def train_and_register_model(
     project_id: str,
     region: str,
