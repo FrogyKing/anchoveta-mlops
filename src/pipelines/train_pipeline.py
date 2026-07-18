@@ -177,11 +177,11 @@ def select_and_register_best_model(
     X_all, y_all = df[FEATURES], df[TARGET]
     best_model_obj.fit(X_all, y_all)
     
-    # Save final model
-    joblib.dump(best_model_obj, final_model.path)
+    # Save final model explicitly as model.joblib in the artifact directory
+    local_dir = os.path.dirname(final_model.path)
+    joblib.dump(best_model_obj, os.path.join(local_dir, "model.joblib"))
     
     # Save stats for drift
-    local_dir = os.path.dirname(final_model.path)
     stats = X_all.agg(['mean', 'std']).T
     stats.to_parquet(os.path.join(local_dir, "stats.parquet"))
     

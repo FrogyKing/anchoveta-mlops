@@ -71,7 +71,7 @@ def predict_and_drift(
     subprocess.run(["gsutil", "cp", "-r", f"{latest_model.uri}/*", tmp_dir])
     
     # load first file found (the model)
-    model_file = [f for f in os.listdir(tmp_dir) if f.endswith(".joblib") or f.endswith(".pkl") or "model" in f][0]
+    model_file = [f for f in os.listdir(tmp_dir) if f.endswith(".joblib") or f.endswith(".pkl") or f.endswith(".bst")][0]
     model = joblib.load(os.path.join(tmp_dir, model_file))
     
     # 2. Extract Data & Feature Engineering
