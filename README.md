@@ -56,17 +56,11 @@ graph TD
     ```
 
 2. **Docker Image**: Push to `main` branch to trigger the GitHub Action (`vertex-pipelines.yml`), which authenticates and builds the image via Cloud Build.
-   Alternatively, to build manually via Cloud Build:
+   To build manually using Google Cloud Build (no local Docker required):
     ```bash
-    gcloud builds submit --config cloudbuild.yaml \
-      --substitutions=_REGION=us-central1,_REPO_NAME=mlops-repo,_IMAGE_NAME=anchoveta-pipeline .
+    gcloud builds submit --config cloudbuild.yaml .
     ```
-   Or to build and push entirely locally (without Cloud Build):
-    ```bash
-    gcloud auth configure-docker us-central1-docker.pkg.dev
-    docker build -t $DOCKER_IMAGE_URI .
-    docker push $DOCKER_IMAGE_URI
-    ```
+    *(Note: If you have different project values than the defaults in `cloudbuild.yaml`, use `--substitutions=_REGION=us-central1,_REPO_NAME=mlops-repo,...`)*
 
 3. **Python Environment**: Install dependencies to compile pipelines locally.
     ```bash
