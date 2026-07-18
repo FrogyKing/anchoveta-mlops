@@ -1,6 +1,7 @@
 CREATE OR REPLACE PROCEDURE `anchoveta.raw.sp_raw_to_silver`()
 BEGIN
 
+  --prueba
   CREATE OR REPLACE TABLE `anchoveta.silver.s_ubicacion` AS
   SELECT
     cell_id,
