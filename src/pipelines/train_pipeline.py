@@ -5,21 +5,47 @@ from kfp.dsl import Input, Output, Dataset, Model
 
 IMAGE_URI = os.getenv("DOCKER_IMAGE_URI", "python:3.10-slim") # To be replaced at compile time or run time
 
-@dsl.component(base_image=IMAGE_URI)
+@dsl.component(
+    base_image=IMAGE_URI,
+    packages_to_install=["google-cloud-bigquery==3.42.2", "pandas<3.0.0", "db-dtypes", "pyarrow"]
+)
 def extract_data_from_bq(
     project_id: str,
     bq_table: str,
     dataset_out: Output[Dataset]
 ):
     from google.cloud import bigquery
+    from google.cloud import bigquery_storage
     import pandas as pd
     
     client = bigquery.Client(project=project_id)
+    bqstorage_client = bigquery_storage.BigQueryReadClient()
+
     query = f"SELECT * FROM `{bq_table}`"
-    df = client.query(query).to_dataframe()
+
+    df = (
+        client.query(query)
+        .result()
+        .to_dataframe(
+            bqstorage_client=bqstorage_client,
+            create_bqstorage_client=False,
+        )
+    )
+    
     df.to_parquet(dataset_out.path, index=False)
 
-@dsl.component(base_image=IMAGE_URI)
+@dsl.component(
+    base_image=IMAGE_URI,
+    packages_to_install=[
+        "google-cloud-aiplatform==1.161.0",
+        "pandas<3.0.0",
+        "scikit-learn==1.9.0",
+        "xgboost==3.3.0",
+        "lightgbm==4.6.0",
+        "catboost==1.2.10",
+        "pyarrow"
+    ]
+)
 def train_and_register_model(
     project_id: str,
     region: str,
