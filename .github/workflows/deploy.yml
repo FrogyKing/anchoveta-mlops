@@ -18,7 +18,7 @@ jobs:
 
       - uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: projects/anchoveta/locations/global/workloadIdentityPools/github/providers/github
+          workload_identity_provider: projects/283342297842/locations/global/workloadIdentityPools/github/providers/github
           service_account: github-cicd@anchoveta.iam.gserviceaccount.com
 
       - uses: google-github-actions/setup-gcloud@v2
