@@ -20,7 +20,7 @@ def apply_feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
     df["ox_lag1"] = df.groupby("cell_id")["oxigeno_ml_l"].shift(1)
     
     # Fill NAs introduced by lags/rolling (simple backfill/forwardfill per group if needed, or 0)
-    df.fillna(method='bfill', inplace=True)
+    df.bfill(inplace=True)
     df.fillna(0, inplace=True)
     
     return df
