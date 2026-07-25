@@ -1,8 +1,8 @@
 google-cloud-bigquery
 google-cloud-aiplatform
 google-cloud-bigquery-storage
-kfp>=2.7.0
-pandas<3.0.0
+kfp
+pandas
 scikit-learn
 xgboost
 lightgbm

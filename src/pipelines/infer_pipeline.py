@@ -9,7 +9,7 @@ print(f"DEBUG: Compiling with IMAGE_URI={IMAGE_URI}")
 
 @dsl.component(
     base_image=IMAGE_URI,
-    packages_to_install=["google-cloud-bigquery==3.42.2", "pandas<3.0.0", "db-dtypes", "pyarrow"]
+    packages_to_install=[]
 )
 def extract_infer_data(
     project_id: str,
@@ -42,15 +42,7 @@ def extract_infer_data(
 
 @dsl.component(
     base_image=IMAGE_URI,
-    packages_to_install=[
-        "google-cloud-aiplatform==1.161.0",
-        "pandas<3.0.0",
-        "scikit-learn==1.9.0",
-        "pyarrow",
-        "xgboost==3.3.0",
-        "lightgbm==4.6.0",
-        "catboost==1.2.10"
-    ]
+    packages_to_install=[]
 )
 def predict(
     project_id: str,
@@ -105,11 +97,7 @@ def predict(
 
 @dsl.component(
     base_image=IMAGE_URI,
-    packages_to_install=[
-        "google-cloud-bigquery==3.42.2",
-        "pandas<3.0.0",
-        "pyarrow"
-    ]
+    packages_to_install=[]
 )
 def save_predictions_to_bq(
     project_id: str,
