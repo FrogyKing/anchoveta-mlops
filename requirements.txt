@@ -1,6 +1,7 @@
 google-cloud-bigquery
 google-cloud-aiplatform
 google-cloud-bigquery-storage
+google-cloud-storage
 kfp
 pandas
 scikit-learn

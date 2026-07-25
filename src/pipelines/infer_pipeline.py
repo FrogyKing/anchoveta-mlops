@@ -68,9 +68,27 @@ def predict(
     
     # Download artifact
     import tempfile
-    import subprocess
+    from pathlib import Path
+    from google.cloud import storage
+
     tmp_dir = tempfile.mkdtemp()
-    subprocess.run(["gsutil", "cp", "-r", f"{latest_model.uri}/*", tmp_dir])
+
+    client = storage.Client(project=project_id)
+
+    gcs_path = latest_model.uri.replace("gs://", "")
+    bucket_name, prefix = gcs_path.split("/", 1)
+
+    bucket = client.bucket(bucket_name)
+
+    for blob in bucket.list_blobs(prefix=prefix):
+        if blob.name.endswith("/"):
+            continue
+
+        rel_path = os.path.relpath(blob.name, prefix)
+        local_path = Path(tmp_dir) / rel_path
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+
+        blob.download_to_filename(str(local_path))
     
     # load model
     model_file = [f for f in os.listdir(tmp_dir) if f.endswith(".joblib") or f.endswith(".pkl") or f.endswith(".bst")][0]
@@ -79,7 +97,12 @@ def predict(
     # Optional: Save downloaded model into Output[Model] artifact if downstream steps need it
     joblib.dump(model, model_artifact_out.path)
     # Also propagate the stats file to the artifact dir for the drift component
-    subprocess.run(["cp", os.path.join(tmp_dir, "stats.parquet"), os.path.join(os.path.dirname(model_artifact_out.path), "stats.parquet")])
+    import shutil
+
+    shutil.copy(
+        os.path.join(tmp_dir, "stats.parquet"),
+        os.path.join(os.path.dirname(model_artifact_out.path), "stats.parquet")
+    )
     
     # 2. Extract Data & Feature Engineering
     df = pd.read_parquet(dataset_in.path)
