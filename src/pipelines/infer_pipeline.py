@@ -120,12 +120,7 @@ def save_predictions_to_bq(
 
 @dsl.component(
     base_image=IMAGE_URI,
-    packages_to_install=[
-        "google-cloud-bigquery==3.42.2",
-        "pandas<3.0.0",
-        "scipy==1.18.0",
-        "pyarrow"
-    ]
+    packages_to_install=[]
 )
 def calculate_and_save_drift(
     project_id: str,
