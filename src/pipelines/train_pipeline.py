@@ -45,27 +45,37 @@ def train_catboost(
     import pandas as pd
     import numpy as np
     import joblib
-    from sklearn.metrics import mean_squared_error, r2_score
+    from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
     from catboost import CatBoostRegressor
     from src.utils.features import apply_feature_engineering, FEATURES, TARGET
-    
+
     df = pd.read_parquet(dataset_in.path)
     df = apply_feature_engineering(df)
-    
+
     corte = df["fecha"].quantile(0.8)
     train_df = df[df["fecha"] <= corte]
     test_df  = df[df["fecha"] > corte]
-    
+
     X_train, y_train = train_df[FEATURES], train_df[TARGET]
     X_test,  y_test  = test_df[FEATURES],  test_df[TARGET]
-    
+
     model = CatBoostRegressor(iterations=3000, depth=6, learning_rate=0.03, l2_leaf_reg=5, loss_function="RMSE", random_seed=42, verbose=0, early_stopping_rounds=200)
     model.fit(X_train, y_train, eval_set=(X_test, y_test))
-    
-    pred = model.predict(X_test)
-    rmse = np.sqrt(mean_squared_error(y_test, pred))
-    
+
+    pred_log = model.predict(X_test)
+    rmse = np.sqrt(mean_squared_error(y_test, pred_log))
+    mae_log = mean_absolute_error(y_test, pred_log)
+    r2_log = r2_score(y_test, pred_log)
+
+    # densidad_real = expm1(prediccion), ya que TARGET = log_densidad (log1p)
+    y_test_real = np.expm1(y_test)
+    pred_real = np.expm1(pred_log)
+    mae_real = mean_absolute_error(y_test_real, pred_real)
+
     metrics_out.log_metric("rmse", float(rmse))
+    metrics_out.log_metric("mae_log", float(mae_log))
+    metrics_out.log_metric("r2_log", float(r2_log))
+    metrics_out.log_metric("mae_real_ton_km2", float(mae_real))
     metrics_out.log_metric("model_name", "CatBoost")
     joblib.dump(model, model_artifact.path)
 
@@ -132,27 +142,37 @@ def train_xgboost(
     import pandas as pd
     import numpy as np
     import joblib
-    from sklearn.metrics import mean_squared_error, r2_score
+    from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
     from xgboost import XGBRegressor
     from src.utils.features import apply_feature_engineering, FEATURES, TARGET
-    
+
     df = pd.read_parquet(dataset_in.path)
     df = apply_feature_engineering(df)
-    
+
     corte = df["fecha"].quantile(0.8)
     train_df = df[df["fecha"] <= corte]
     test_df  = df[df["fecha"] > corte]
-    
+
     X_train, y_train = train_df[FEATURES], train_df[TARGET]
     X_test,  y_test  = test_df[FEATURES],  test_df[TARGET]
-    
+
     model = XGBRegressor(n_estimators=3000, max_depth=6, learning_rate=0.03, reg_lambda=5, random_state=42, verbosity=0, early_stopping_rounds=200)
     model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
-    
-    pred = model.predict(X_test)
-    rmse = np.sqrt(mean_squared_error(y_test, pred))
-    
+
+    pred_log = model.predict(X_test)
+    rmse = np.sqrt(mean_squared_error(y_test, pred_log))
+    mae_log = mean_absolute_error(y_test, pred_log)
+    r2_log = r2_score(y_test, pred_log)
+
+    # densidad_real = expm1(prediccion), ya que TARGET = log_densidad (log1p)
+    y_test_real = np.expm1(y_test)
+    pred_real = np.expm1(pred_log)
+    mae_real = mean_absolute_error(y_test_real, pred_real)
+
     metrics_out.log_metric("rmse", float(rmse))
+    metrics_out.log_metric("mae_log", float(mae_log))
+    metrics_out.log_metric("r2_log", float(r2_log))
+    metrics_out.log_metric("mae_real_ton_km2", float(mae_real))
     metrics_out.log_metric("model_name", "XGBoost")
     joblib.dump(model, model_artifact.path)
 
