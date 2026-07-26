@@ -1,6 +1,6 @@
 CREATE OR REPLACE PROCEDURE `anchoveta.silver.sp_silver_to_gold`()
 BEGIN
-
+--HOLA1
   -- Gold 1: feature table para modelo (lags/rolling)
   CREATE OR REPLACE TABLE `anchoveta.gold.gold_features` AS
   SELECT *,
