@@ -105,21 +105,29 @@ BEGIN
   WHERE rn = 1;
 
   CREATE OR REPLACE TABLE `anchoveta.silver.silver_anchoveta` AS
-  SELECT
-    u.cell_id, u.fecha,
-    EXTRACT(YEAR FROM u.fecha)    AS anio,
-    EXTRACT(MONTH FROM u.fecha)   AS mes,
-    EXTRACT(ISOWEEK FROM u.fecha) AS semana_anio,
-    u.latitud, u.longitud, u.zona_pesca,
-    u.dist_costa_deg, u.profundidad_m,
-    o.sst_c, o.clorofila_mg_m3, o.salinidad_psu, o.oxigeno_ml_l,
-    c.corriente_vel_ms, c.corriente_u_ms, c.corriente_v_ms,
-    e.enso_index,
-    b.log_densidad, b.densidad_ton_km2
-  FROM `anchoveta.silver.s_ubicacion` u
-  JOIN `anchoveta.silver.s_oceanografia` o USING(cell_id, fecha)
-  JOIN `anchoveta.silver.s_corrientes`   c USING(cell_id, fecha)
-  JOIN `anchoveta.silver.s_biomasa`      b USING(cell_id, fecha)
-  LEFT JOIN `anchoveta.silver.s_enso`    e USING(fecha);
+  SELECT * EXCEPT(rn)
+  FROM (
+    SELECT
+      u.cell_id, u.fecha,
+      EXTRACT(YEAR FROM u.fecha)    AS anio,
+      EXTRACT(MONTH FROM u.fecha)   AS mes,
+      EXTRACT(ISOWEEK FROM u.fecha) AS semana_anio,
+      u.latitud, u.longitud, u.zona_pesca,
+      u.dist_costa_deg, u.profundidad_m,
+      o.sst_c, o.clorofila_mg_m3, o.salinidad_psu, o.oxigeno_ml_l,
+      c.corriente_vel_ms, c.corriente_u_ms, c.corriente_v_ms,
+      e.enso_index,
+      b.log_densidad, b.densidad_ton_km2,
+      ROW_NUMBER() OVER (
+        PARTITION BY u.cell_id, u.fecha
+        ORDER BY u.fecha
+      ) AS rn
+    FROM `anchoveta.silver.s_ubicacion` u
+    JOIN `anchoveta.silver.s_oceanografia` o USING(cell_id, fecha)
+    JOIN `anchoveta.silver.s_corrientes` c USING(cell_id, fecha)
+    JOIN `anchoveta.silver.s_biomasa` b USING(cell_id, fecha)
+    LEFT JOIN `anchoveta.silver.s_enso` e USING(fecha)
+  )
+  WHERE rn = 1;
 
 END;
