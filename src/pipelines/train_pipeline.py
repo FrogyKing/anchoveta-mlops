@@ -78,27 +78,48 @@ def train_lightgbm(
     import pandas as pd
     import numpy as np
     import joblib
-    from sklearn.metrics import mean_squared_error, r2_score
+    from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
     from lightgbm import LGBMRegressor
     from src.utils.features import apply_feature_engineering, FEATURES, TARGET
-    
+
+    # Config ganadora del RandomizedSearchCV (LightGBM, RMSE=0.6638 en log-space)
+    BEST_PARAMS = {
+        "num_leaves": 50,
+        "n_estimators": 200,
+        "max_depth": 10,
+        "learning_rate": 0.05,
+        "random_state": 42,
+        "n_jobs": -1,
+        "verbose": -1,
+    }
+
     df = pd.read_parquet(dataset_in.path)
     df = apply_feature_engineering(df)
-    
+
     corte = df["fecha"].quantile(0.8)
     train_df = df[df["fecha"] <= corte]
     test_df  = df[df["fecha"] > corte]
-    
+
     X_train, y_train = train_df[FEATURES], train_df[TARGET]
     X_test,  y_test  = test_df[FEATURES],  test_df[TARGET]
-    
-    model = LGBMRegressor(n_estimators=3000, max_depth=6, learning_rate=0.03, num_leaves=31, reg_lambda=5, random_state=42, verbose=-1)
-    model.fit(X_train, y_train, eval_set=[(X_test, y_test)])
-    
-    pred = model.predict(X_test)
-    rmse = np.sqrt(mean_squared_error(y_test, pred))
-    
+
+    model = LGBMRegressor(**BEST_PARAMS)
+    model.fit(X_train, y_train)
+
+    pred_log = model.predict(X_test)
+    rmse = np.sqrt(mean_squared_error(y_test, pred_log))
+    mae_log = mean_absolute_error(y_test, pred_log)
+    r2_log = r2_score(y_test, pred_log)
+
+    # densidad_real = expm1(prediccion), ya que TARGET = log_densidad (log1p)
+    y_test_real = np.expm1(y_test)
+    pred_real = np.expm1(pred_log)
+    mae_real = mean_absolute_error(y_test_real, pred_real)
+
     metrics_out.log_metric("rmse", float(rmse))
+    metrics_out.log_metric("mae_log", float(mae_log))
+    metrics_out.log_metric("r2_log", float(r2_log))
+    metrics_out.log_metric("mae_real_ton_km2", float(mae_real))
     metrics_out.log_metric("model_name", "LightGBM")
     joblib.dump(model, model_artifact.path)
 
