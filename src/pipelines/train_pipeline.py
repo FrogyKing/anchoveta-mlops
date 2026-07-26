@@ -133,6 +133,8 @@ def train_lightgbm(
     metrics_out.log_metric("model_name", "LightGBM")
     joblib.dump(model, model_artifact.path)
 
+#hola1
+
 @dsl.component(base_image=IMAGE_URI)
 def train_xgboost(
     dataset_in: Input[Dataset],
